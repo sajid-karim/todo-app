@@ -8,6 +8,8 @@ from pydantic import BaseModel
 
 router = APIRouter()
 # Dependency
+
+
 def get_db():
     db = DBengine.SessionLocal()
     try:
@@ -17,27 +19,36 @@ def get_db():
 
 
 class TodoItem(BaseModel):
-  id: int
-  title: str
-  description: str
-  completed: bool
+    id: int
+    title: str
+    description: str
+    completed: bool
+
+    class Config:
+        from_attributes = True
+
 
 @router.get("/todos/{todo_id}", response_model=TodoItem)
 def read_todo(todo_id: int, db: Session = Depends(get_db)):
-  return crud.get_todo(db, todo_id)
+    item = crud.get_todo(db, todo_id)
+    return item
+
 
 @router.get("/todos", response_model=list[TodoItem])
 def read_todos(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-  return crud.get_todos(db, skip, limit)
+    return crud.get_todos(db, skip, limit)
+
 
 @router.post("/todos", response_model=TodoItem)
 def create_todo(todo: TodoItem, db: Session = Depends(get_db)):
-  return crud.create_todo(db, todo)
+    return crud.create_todo(db, todo)
+
 
 @router.put("/todos/{todo_id}", response_model=TodoItem)
 def update_todo(todo_id: int, todo, db: Session = Depends(get_db)):
-  return crud.update_todo(db, todo_id, todo)
+    return crud.update_todo(db, todo_id, todo)
+
 
 @router.delete("/todos/{todo_id}", response_model=TodoItem)
 def delete_todo(todo_id: int, db: Session = Depends(get_db)):
-  return crud.delete_todo(db, todo_id)
+    return crud.delete_todo(db, todo_id)
